@@ -2,15 +2,14 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// TODO: Replace with your Firebase project configuration
-// Get this from Firebase Console > Project Settings > General
+// Firebase configuration from Firebase Console
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyA4pH68vclHIU2ahMfRZguixmvP7bvmTas",
+  authDomain: "bashify-f7441.firebaseapp.com",
+  projectId: "bashify-f7441",
+  storageBucket: "bashify-f7441.firebasestorage.app",
+  messagingSenderId: "4459444493",
+  appId: "1:4459444493:web:654d7e780d94cb6b395844"
 };
 
 // Initialize Firebase
