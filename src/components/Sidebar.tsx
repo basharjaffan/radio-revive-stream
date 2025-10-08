@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Radio, Boxes, Users, Settings, Activity, FileText, Headphones } from 'lucide-react';
+import { Radio, Boxes, Users, Settings, Activity, FileText, Headphones, Database } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Activity },
@@ -9,6 +9,7 @@ const navigation = [
   { name: 'Users', href: '/users', icon: Users },
   { name: 'Logs', href: '/logs', icon: FileText },
   { name: 'User Portal', href: '/portal', icon: Headphones },
+  { name: 'Firebase Setup', href: '/firebase-setup', icon: Database },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
