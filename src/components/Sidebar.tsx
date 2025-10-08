@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Radio, Boxes, Users, Settings, Activity, FileText } from 'lucide-react';
+import { Radio, Boxes, Users, Settings, Activity, FileText, Headphones } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Activity },
@@ -8,6 +8,7 @@ const navigation = [
   { name: 'Groups', href: '/groups', icon: Boxes },
   { name: 'Users', href: '/users', icon: Users },
   { name: 'Logs', href: '/logs', icon: FileText },
+  { name: 'User Portal', href: '/portal', icon: Headphones },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 

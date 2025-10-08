@@ -1,21 +1,29 @@
-import { useState } from 'react';
-import { mockGroups, mockDevices } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Radio, Calendar } from 'lucide-react';
-import { toast } from 'sonner';
+import { useGroups } from '@/hooks/useGroups';
+import { useDevices } from '@/hooks/useDevices';
 
 const Groups = () => {
-  const [groups] = useState(mockGroups);
+  const { groups, loading, sendGroupCommand } = useGroups();
+  const { devices } = useDevices();
 
   const handleAddGroup = () => {
-    toast.info('Add group functionality coming soon');
+    // TODO: Open add group modal
   };
 
-  const handleGroupCommand = (groupId: string, command: string) => {
-    toast.success(`Sending ${command} to all devices in group ${groupId}`);
+  const handleGroupCommand = async (groupId: string, command: string) => {
+    await sendGroupCommand(groupId, command);
   };
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading groups...</p>
+      </div>
+    );
+  }
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('sv-SE', {
@@ -27,7 +35,7 @@ const Groups = () => {
 
   const getDeviceNames = (deviceIds: string[]) => {
     return deviceIds
-      .map(id => mockDevices.find(d => d.id === id)?.name || id)
+      .map(id => devices.find(d => d.id === id)?.name || id)
       .join(', ');
   };
 

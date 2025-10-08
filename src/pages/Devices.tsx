@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { DeviceCard } from '@/components/DeviceCard';
-import { mockDevices } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search } from 'lucide-react';
-import { toast } from 'sonner';
+import { useDevices } from '@/hooks/useDevices';
 
 const Devices = () => {
-  const [devices] = useState(mockDevices);
+  const { devices, loading, sendCommand } = useDevices();
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredDevices = devices.filter(device =>
@@ -15,17 +14,25 @@ const Devices = () => {
     device.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCommand = (deviceId: string, command: string) => {
-    toast.success(`Command sent: ${command} to ${deviceId}`);
+  const handleCommand = async (deviceId: string, command: string) => {
+    await sendCommand(deviceId, command);
   };
 
   const handleConfigure = (deviceId: string) => {
-    toast.info(`Opening configuration for ${deviceId}`);
+    // TODO: Open configuration modal/dialog
   };
 
   const handleAddDevice = () => {
-    toast.info('Add device functionality coming soon');
+    // TODO: Open add device modal/dialog
   };
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading devices...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 space-y-6 p-8">

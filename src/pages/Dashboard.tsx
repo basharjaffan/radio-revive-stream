@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { DeviceCard } from '@/components/DeviceCard';
 import { StatsCard } from '@/components/StatsCard';
-import { mockDevices, mockLogs } from '@/lib/mockData';
+import { mockLogs } from '@/lib/mockData';
 import { Radio, Activity, AlertTriangle, PlayCircle } from 'lucide-react';
-import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useDevices } from '@/hooks/useDevices';
 
 const Dashboard = () => {
-  const [devices] = useState(mockDevices);
+  const { devices, loading, sendCommand } = useDevices();
   const [logs] = useState(mockLogs.slice(0, 5));
 
   const stats = {
@@ -18,13 +18,21 @@ const Dashboard = () => {
     unconfigured: devices.filter(d => d.status === 'unconfigured').length,
   };
 
-  const handleCommand = (deviceId: string, command: string) => {
-    toast.success(`Command sent: ${command} to ${deviceId}`);
+  const handleCommand = async (deviceId: string, command: string) => {
+    await sendCommand(deviceId, command);
   };
 
   const handleConfigure = (deviceId: string) => {
-    toast.info(`Opening configuration for ${deviceId}`);
+    // TODO: Open configuration modal
   };
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading dashboard...</p>
+      </div>
+    );
+  }
 
   const formatTimestamp = (date: Date) => {
     return new Intl.DateTimeFormat('sv-SE', {
