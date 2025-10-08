@@ -2,12 +2,23 @@ import { useState, useEffect } from 'react';
 import { Device } from '@/types/device';
 import { deviceService } from '@/services/deviceService';
 import { toast } from '@/hooks/use-toast';
+import { mockDevices } from '@/lib/mockData';
+
+// Use mock data until Firebase is properly configured
+const USE_MOCK_DATA = true;
 
 export const useDevices = () => {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (USE_MOCK_DATA) {
+      // Use mock data for testing
+      setDevices(mockDevices);
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = deviceService.subscribeToDevices((updatedDevices) => {
       setDevices(updatedDevices);
       setLoading(false);
@@ -18,6 +29,14 @@ export const useDevices = () => {
 
   const createDevice = async (device: Omit<Device, 'id'>) => {
     try {
+      if (USE_MOCK_DATA) {
+        toast({
+          title: "Mock Mode",
+          description: "Configure Firebase to enable device creation",
+          variant: "destructive",
+        });
+        return;
+      }
       await deviceService.createDevice(device);
       toast({
         title: "Device created",
@@ -34,6 +53,15 @@ export const useDevices = () => {
 
   const updateDevice = async (id: string, data: Partial<Device>) => {
     try {
+      if (USE_MOCK_DATA) {
+        // Update mock data locally
+        setDevices(prev => prev.map(d => d.id === id ? { ...d, ...data } : d));
+        toast({
+          title: "Device updated",
+          description: "Device has been updated (mock mode)",
+        });
+        return;
+      }
       await deviceService.updateDevice(id, data);
       toast({
         title: "Device updated",
@@ -50,6 +78,14 @@ export const useDevices = () => {
 
   const deleteDevice = async (id: string) => {
     try {
+      if (USE_MOCK_DATA) {
+        toast({
+          title: "Mock Mode",
+          description: "Configure Firebase to enable device deletion",
+          variant: "destructive",
+        });
+        return;
+      }
       await deviceService.deleteDevice(id);
       toast({
         title: "Device deleted",
@@ -66,6 +102,27 @@ export const useDevices = () => {
 
   const sendCommand = async (deviceId: string, command: string, params?: any) => {
     try {
+      if (USE_MOCK_DATA) {
+        // Simulate command in mock mode
+        if (command === 'play') {
+          setDevices(prev => prev.map(d => 
+            d.id === deviceId ? { ...d, status: 'playing' as const } : d
+          ));
+        } else if (command === 'pause') {
+          setDevices(prev => prev.map(d => 
+            d.id === deviceId ? { ...d, status: 'paused' as const } : d
+          ));
+        } else if (command === 'set_url' && params?.url) {
+          setDevices(prev => prev.map(d => 
+            d.id === deviceId ? { ...d, currentUrl: params.url } : d
+          ));
+        }
+        toast({
+          title: "Command sent",
+          description: `Command "${command}" sent to device (mock mode)`,
+        });
+        return;
+      }
       await deviceService.sendCommand(deviceId, command, params);
       toast({
         title: "Command sent",
@@ -89,3 +146,4 @@ export const useDevices = () => {
     sendCommand,
   };
 };
+

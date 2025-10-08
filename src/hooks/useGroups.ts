@@ -2,12 +2,23 @@ import { useState, useEffect } from 'react';
 import { DeviceGroup } from '@/types/group';
 import { groupService } from '@/services/groupService';
 import { toast } from '@/hooks/use-toast';
+import { mockGroups } from '@/lib/mockData';
+
+// Use mock data until Firebase is properly configured
+const USE_MOCK_DATA = true;
 
 export const useGroups = () => {
   const [groups, setGroups] = useState<DeviceGroup[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (USE_MOCK_DATA) {
+      // Use mock data for testing
+      setGroups(mockGroups);
+      setLoading(false);
+      return;
+    }
+
     loadGroups();
   }, []);
 
@@ -28,6 +39,14 @@ export const useGroups = () => {
 
   const createGroup = async (group: Omit<DeviceGroup, 'id'>) => {
     try {
+      if (USE_MOCK_DATA) {
+        toast({
+          title: "Mock Mode",
+          description: "Configure Firebase to enable group creation",
+          variant: "destructive",
+        });
+        return;
+      }
       await groupService.createGroup(group);
       await loadGroups();
       toast({
@@ -45,6 +64,14 @@ export const useGroups = () => {
 
   const updateGroup = async (id: string, data: Partial<DeviceGroup>) => {
     try {
+      if (USE_MOCK_DATA) {
+        toast({
+          title: "Mock Mode",
+          description: "Configure Firebase to enable group updates",
+          variant: "destructive",
+        });
+        return;
+      }
       await groupService.updateGroup(id, data);
       await loadGroups();
       toast({
@@ -62,6 +89,14 @@ export const useGroups = () => {
 
   const deleteGroup = async (id: string) => {
     try {
+      if (USE_MOCK_DATA) {
+        toast({
+          title: "Mock Mode",
+          description: "Configure Firebase to enable group deletion",
+          variant: "destructive",
+        });
+        return;
+      }
       await groupService.deleteGroup(id);
       await loadGroups();
       toast({
@@ -79,6 +114,13 @@ export const useGroups = () => {
 
   const sendGroupCommand = async (groupId: string, command: string, params?: any) => {
     try {
+      if (USE_MOCK_DATA) {
+        toast({
+          title: "Command sent",
+          description: `Command "${command}" sent to all devices in group (mock mode)`,
+        });
+        return;
+      }
       await groupService.sendGroupCommand(groupId, command, params);
       toast({
         title: "Command sent",
