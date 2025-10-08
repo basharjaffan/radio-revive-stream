@@ -1,20 +1,22 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Radio, Calendar } from 'lucide-react';
+import { Plus, Radio, Calendar, RotateCw } from 'lucide-react';
 import { useGroups } from '@/hooks/useGroups';
 import { useDevices } from '@/hooks/useDevices';
 
 const Groups = () => {
-  const { groups, loading, sendGroupCommand } = useGroups();
-  const { devices } = useDevices();
+  const { groups, loading } = useGroups();
+  const { devices, sendCommand } = useDevices();
 
   const handleAddGroup = () => {
     // TODO: Open add group modal
   };
 
   const handleGroupCommand = async (groupId: string, command: string) => {
-    await sendGroupCommand(groupId, command);
+    const group = groups.find(g => g.id === groupId);
+    if (!group) return;
+    await Promise.all(group.deviceIds.map(id => sendCommand(id, command)));
   };
 
   if (loading) {
@@ -98,6 +100,14 @@ const Groups = () => {
                   size="sm"
                 >
                   Pause All
+                </Button>
+                <Button
+                  onClick={() => handleGroupCommand(group.id, 'reboot')}
+                  className="flex-1"
+                  variant="secondary"
+                  size="sm"
+                >
+                  Restart All
                 </Button>
               </div>
             </CardContent>

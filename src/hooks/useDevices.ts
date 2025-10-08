@@ -55,7 +55,7 @@ export const useDevices = () => {
     try {
       if (USE_MOCK_DATA) {
         // Update mock data locally
-        setDevices(prev => prev.map(d => d.id === id ? { ...d, ...data } : d));
+        setDevices((prev) => prev.map((d) => (d.id === id ? { ...d, ...data } : d)));
         toast({
           title: "Device updated",
           description: "Device has been updated (mock mode)",
@@ -105,17 +105,42 @@ export const useDevices = () => {
       if (USE_MOCK_DATA) {
         // Simulate command in mock mode
         if (command === 'play') {
-          setDevices(prev => prev.map(d => 
-            d.id === deviceId ? { ...d, status: 'playing' as const } : d
-          ));
+          setDevices((prev) =>
+            prev.map((d) => (d.id === deviceId ? { ...d, status: 'playing' as const, lastSeen: new Date() } : d)),
+          );
         } else if (command === 'pause') {
-          setDevices(prev => prev.map(d => 
-            d.id === deviceId ? { ...d, status: 'paused' as const } : d
-          ));
+          setDevices((prev) =>
+            prev.map((d) => (d.id === deviceId ? { ...d, status: 'paused' as const, lastSeen: new Date() } : d)),
+          );
         } else if (command === 'set_url' && params?.url) {
-          setDevices(prev => prev.map(d => 
-            d.id === deviceId ? { ...d, currentUrl: params.url } : d
-          ));
+          setDevices((prev) =>
+            prev.map((d) => (d.id === deviceId ? { ...d, currentUrl: params.url, lastSeen: new Date() } : d)),
+          );
+        } else if (command === 'reboot') {
+          // Briefly set to offline, then back online (or playing if it was)
+          let previousStatus: Device['status'] | null = null;
+          setDevices((prev) =>
+            prev.map((d) => {
+              if (d.id === deviceId) {
+                previousStatus = d.status;
+                return { ...d, status: 'offline' as const, lastSeen: new Date() };
+              }
+              return d;
+            }),
+          );
+          setTimeout(() => {
+            setDevices((prev) =>
+              prev.map((d) =>
+                d.id === deviceId
+                  ? {
+                      ...d,
+                      status: previousStatus === 'playing' ? 'playing' : 'online',
+                      lastSeen: new Date(),
+                    }
+                  : d,
+              ),
+            );
+          }, 800);
         }
         toast({
           title: "Command sent",
@@ -146,4 +171,3 @@ export const useDevices = () => {
     sendCommand,
   };
 };
-

@@ -2,12 +2,22 @@ import { useState } from 'react';
 import { DeviceCard } from '@/components/DeviceCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Search } from 'lucide-react';
 import { useDevices } from '@/hooks/useDevices';
 
 const Devices = () => {
   const { devices, loading, sendCommand } = useDevices();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const toggleSelected = (id: string, checked: boolean) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(id); else next.delete(id);
+      return next;
+    });
+  };
 
   const filteredDevices = devices.filter(device =>
     device.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -24,6 +34,10 @@ const Devices = () => {
 
   const handleAddDevice = () => {
     // TODO: Open add device modal/dialog
+  };
+
+  const handleBatch = async (command: string) => {
+    await Promise.all([...selected].map(id => sendCommand(id, command)));
   };
 
   if (loading) {
@@ -57,16 +71,32 @@ const Devices = () => {
             className="pl-9"
           />
         </div>
+
+        {selected.size > 0 && (
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={() => handleBatch('play')}>Play Selected</Button>
+            <Button size="sm" variant="outline" onClick={() => handleBatch('pause')}>Pause Selected</Button>
+            <Button size="sm" variant="secondary" onClick={() => handleBatch('reboot')}>Restart Selected</Button>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredDevices.map(device => (
-          <DeviceCard
-            key={device.id}
-            device={device}
-            onCommand={handleCommand}
-            onConfigure={handleConfigure}
-          />
+          <div key={device.id} className="relative">
+            <div className="absolute left-2 top-2 z-10">
+              <Checkbox
+                checked={selected.has(device.id)}
+                onCheckedChange={(v) => toggleSelected(device.id, Boolean(v))}
+                aria-label={`Select ${device.name}`}
+              />
+            </div>
+            <DeviceCard
+              device={device}
+              onCommand={handleCommand}
+              onConfigure={handleConfigure}
+            />
+          </div>
         ))}
       </div>
 
