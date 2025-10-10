@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { useDevices } from '@/hooks/useDevices';
+import { useData } from '@/contexts/DataContext';
 import { Play, Pause, RotateCw, Volume2, VolumeX } from 'lucide-react';
 
 const UserPortal = () => {
-  const { devices, sendCommand } = useDevices();
+  const { devices, sendCommand } = useData();
   const [volume, setVolume] = useState<number>(50);
 
   // Automatically select first available device

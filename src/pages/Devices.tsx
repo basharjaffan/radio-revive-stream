@@ -9,14 +9,20 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Search, AlertCircle } from 'lucide-react';
-import { useDevices } from '@/hooks/useDevices';
-import { useGroups } from '@/hooks/useGroups';
+import { useData } from '@/contexts/DataContext';
 import { Device } from '@/types/device';
 import { toast } from 'sonner';
 
 const Devices = () => {
-  const { devices, loading, sendCommand, updateDevice, createDevice, deleteDevice } = useDevices();
-  const { groups } = useGroups();
+  const { 
+    devices, 
+    devicesLoading: loading, 
+    sendCommand, 
+    updateDevice, 
+    createDevice, 
+    deleteDevice,
+    groups 
+  } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [configureDevice, setConfigureDevice] = useState<Device | null>(null);

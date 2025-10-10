@@ -10,10 +10,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Plus, Mail, Calendar, LogIn, MoreVertical, Trash2 } from 'lucide-react';
 import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
-import { useUsers } from '@/hooks/useUsers';
+import { useData } from '@/contexts/DataContext';
 
 const Users = () => {
-  const { users, loading, deleteUser } = useUsers();
+  const { users, usersLoading: loading, deleteUser } = useData();
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 

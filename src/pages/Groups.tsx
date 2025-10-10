@@ -12,13 +12,19 @@ import { CreateGroupDialog } from '@/components/CreateGroupDialog';
 import { EditGroupDialog } from '@/components/EditGroupDialog';
 import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
 import { Plus, Radio, Calendar, MoreVertical, Pencil, Trash2, Link as LinkIcon } from 'lucide-react';
-import { useGroups } from '@/hooks/useGroups';
-import { useDevices } from '@/hooks/useDevices';
+import { useData } from '@/contexts/DataContext';
 import { DeviceGroup } from '@/types/group';
 
 const Groups = () => {
-  const { groups, loading, createGroup, updateGroup, deleteGroup } = useGroups();
-  const { devices, sendCommand } = useDevices();
+  const { 
+    groups, 
+    groupsLoading: loading, 
+    createGroup, 
+    updateGroup, 
+    deleteGroup,
+    devices,
+    sendCommand 
+  } = useData();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editGroup, setEditGroup] = useState<DeviceGroup | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);

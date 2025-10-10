@@ -5,10 +5,10 @@ import { mockLogs } from '@/lib/mockData';
 import { Radio, Activity, AlertTriangle, PlayCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useDevices } from '@/hooks/useDevices';
+import { useData } from '@/contexts/DataContext';
 
 const Dashboard = () => {
-  const { devices, loading, sendCommand } = useDevices();
+  const { devices, devicesLoading: loading, sendCommand } = useData();
   const [logs] = useState(mockLogs.slice(0, 5));
 
   const stats = {
