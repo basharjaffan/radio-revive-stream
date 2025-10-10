@@ -73,7 +73,7 @@ export function ConfigureDeviceDialog({
     try {
       await onConfigure(device.id, {
         name: data.name,
-        group: data.group || undefined,
+        group: data.group && data.group !== 'none' ? data.group : undefined,
       });
       onOpenChange(false);
       form.reset();
@@ -130,7 +130,7 @@ export function ConfigureDeviceDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">No group</SelectItem>
+                      <SelectItem value="none">No group</SelectItem>
                       {groups.map((group) => (
                         <SelectItem key={group.id} value={group.id}>
                           {group.name}
