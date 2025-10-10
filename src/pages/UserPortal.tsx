@@ -12,29 +12,19 @@ import { Play, Pause, RotateCw, Volume2, VolumeX, Radio, Users } from 'lucide-re
 const UserPortal = () => {
   const { devices, sendCommand } = useDevices();
   const { groups, sendGroupCommand } = useGroups();
-  const [selectedDevice, setSelectedDevice] = useState<string>('');
-  const [selectedGroup, setSelectedGroup] = useState<string>('');
-  const [streamUrl, setStreamUrl] = useState('');
+  const [selectedTarget, setSelectedTarget] = useState<string>('');
   const [volume, setVolume] = useState<number>(50);
 
-  const handleDeviceCommand = async (command: string, params?: any) => {
-    if (!selectedDevice) return;
-    await sendCommand(selectedDevice, command, params);
-  };
+  const isGroup = selectedTarget?.startsWith('group-');
+  const targetId = selectedTarget?.replace('group-', '');
 
-  const handleGroupCommand = async (command: string, params?: any) => {
-    if (!selectedGroup) return;
-    await sendGroupCommand(selectedGroup, command, params);
-  };
-
-  const handlePlayUrl = async () => {
-    if (!streamUrl) return;
-    if (selectedDevice) {
-      await sendCommand(selectedDevice, 'set_url', { url: streamUrl });
-      await sendCommand(selectedDevice, 'play');
-    } else if (selectedGroup) {
-      await sendGroupCommand(selectedGroup, 'set_url', { url: streamUrl });
-      await sendGroupCommand(selectedGroup, 'play');
+  const handleCommand = async (command: string, params?: any) => {
+    if (!selectedTarget) return;
+    
+    if (isGroup) {
+      await sendGroupCommand(targetId, command, params);
+    } else {
+      await sendCommand(selectedTarget, command, params);
     }
   };
 
@@ -42,10 +32,10 @@ const UserPortal = () => {
     const newVolume = value[0];
     setVolume(newVolume);
     
-    if (selectedDevice) {
-      await sendCommand(selectedDevice, 'set_volume', { volume: newVolume });
-    } else if (selectedGroup) {
-      await sendGroupCommand(selectedGroup, 'set_volume', { volume: newVolume });
+    if (isGroup) {
+      await sendGroupCommand(targetId, 'set_volume', { volume: newVolume });
+    } else if (selectedTarget) {
+      await sendCommand(selectedTarget, 'set_volume', { volume: newVolume });
     }
   };
 
@@ -67,59 +57,37 @@ const UserPortal = () => {
             <CardDescription>Select and control your music</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Device/Group Selection */}
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="device-select">Device</Label>
-                <Select 
-                  value={selectedDevice} 
-                  onValueChange={(value) => {
-                    setSelectedDevice(value);
-                    setSelectedGroup('');
-                  }}
-                >
-                  <SelectTrigger id="device-select">
-                    <SelectValue placeholder="Choose a device" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {devices.filter(d => d.status !== 'unconfigured').map(device => (
-                      <SelectItem key={device.id} value={device.id}>
-                        {device.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="group-select">Group</Label>
-                <Select 
-                  value={selectedGroup} 
-                  onValueChange={(value) => {
-                    setSelectedGroup(value);
-                    setSelectedDevice('');
-                  }}
-                >
-                  <SelectTrigger id="group-select">
-                    <SelectValue placeholder="Choose a group" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {groups.map(group => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name} ({group.deviceIds.length} devices)
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Target Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="target-select">Select what to control</Label>
+              <Select value={selectedTarget} onValueChange={setSelectedTarget}>
+                <SelectTrigger id="target-select">
+                  <SelectValue placeholder="Choose a device or group" />
+                </SelectTrigger>
+                <SelectContent>
+                  {devices.filter(d => d.status !== 'unconfigured').map(device => (
+                    <SelectItem key={device.id} value={device.id}>
+                      📻 {device.name}
+                    </SelectItem>
+                  ))}
+                  {groups.length > 0 && devices.filter(d => d.status !== 'unconfigured').length > 0 && (
+                    <SelectItem value="separator" disabled>──────────</SelectItem>
+                  )}
+                  {groups.map(group => (
+                    <SelectItem key={group.id} value={`group-${group.id}`}>
+                      👥 {group.name} ({group.deviceIds.length} devices)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Playback Buttons */}
             <div className="grid grid-cols-3 gap-3">
               <Button
                 size="lg"
-                onClick={() => selectedDevice ? handleDeviceCommand('play') : handleGroupCommand('play')}
-                disabled={!selectedDevice && !selectedGroup}
+                onClick={() => handleCommand('play')}
+                disabled={!selectedTarget}
                 className="h-20"
               >
                 <div className="flex flex-col items-center gap-2">
@@ -130,8 +98,8 @@ const UserPortal = () => {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => selectedDevice ? handleDeviceCommand('pause') : handleGroupCommand('pause')}
-                disabled={!selectedDevice && !selectedGroup}
+                onClick={() => handleCommand('pause')}
+                disabled={!selectedTarget}
                 className="h-20"
               >
                 <div className="flex flex-col items-center gap-2">
@@ -142,8 +110,8 @@ const UserPortal = () => {
               <Button
                 size="lg"
                 variant="secondary"
-                onClick={() => selectedDevice ? handleDeviceCommand('reboot') : handleGroupCommand('reboot')}
-                disabled={!selectedDevice && !selectedGroup}
+                onClick={() => handleCommand('reboot')}
+                disabled={!selectedTarget}
                 className="h-20"
               >
                 <div className="flex flex-col items-center gap-2">
@@ -170,13 +138,13 @@ const UserPortal = () => {
                   max={100}
                   step={5}
                   className="flex-1"
-                  disabled={!selectedDevice && !selectedGroup}
+                  disabled={!selectedTarget}
                 />
                 <Volume2 className="h-5 w-5 text-muted-foreground" />
               </div>
             </div>
 
-            {!selectedDevice && !selectedGroup && (
+            {!selectedTarget && (
               <p className="text-sm text-muted-foreground text-center">
                 Select a device or group to start
               </p>
