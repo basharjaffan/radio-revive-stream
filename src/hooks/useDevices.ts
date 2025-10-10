@@ -30,10 +30,15 @@ export const useDevices = () => {
   const createDevice = async (device: Omit<Device, 'id'>) => {
     try {
       if (USE_MOCK_DATA) {
+        // Mock mode: add locally
+        const newDevice = {
+          ...device,
+          id: `device-${Date.now()}`,
+        };
+        setDevices(prev => [...prev, newDevice]);
         toast({
-          title: "Mock Mode",
-          description: "Configure Firebase to enable device creation",
-          variant: "destructive",
+          title: "Device created",
+          description: "Device has been created successfully (mock mode)",
         });
         return;
       }
@@ -79,10 +84,11 @@ export const useDevices = () => {
   const deleteDevice = async (id: string) => {
     try {
       if (USE_MOCK_DATA) {
+        // Mock mode: delete locally
+        setDevices(prev => prev.filter(d => d.id !== id));
         toast({
-          title: "Mock Mode",
-          description: "Configure Firebase to enable device deletion",
-          variant: "destructive",
+          title: "Device deleted",
+          description: "Device has been deleted successfully (mock mode)",
         });
         return;
       }

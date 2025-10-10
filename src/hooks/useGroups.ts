@@ -40,10 +40,15 @@ export const useGroups = () => {
   const createGroup = async (group: Omit<DeviceGroup, 'id'>) => {
     try {
       if (USE_MOCK_DATA) {
+        // Mock mode: add locally
+        const newGroup = {
+          ...group,
+          id: `group-${Date.now()}`,
+        };
+        setGroups(prev => [...prev, newGroup]);
         toast({
-          title: "Mock Mode",
-          description: "Configure Firebase to enable group creation",
-          variant: "destructive",
+          title: "Group created",
+          description: "Group has been created successfully (mock mode)",
         });
         return;
       }
@@ -65,10 +70,13 @@ export const useGroups = () => {
   const updateGroup = async (id: string, data: Partial<DeviceGroup>) => {
     try {
       if (USE_MOCK_DATA) {
+        // Mock mode: update locally
+        setGroups(prev => prev.map(g => 
+          g.id === id ? { ...g, ...data } : g
+        ));
         toast({
-          title: "Mock Mode",
-          description: "Configure Firebase to enable group updates",
-          variant: "destructive",
+          title: "Group updated",
+          description: "Group has been updated successfully (mock mode)",
         });
         return;
       }
@@ -90,10 +98,11 @@ export const useGroups = () => {
   const deleteGroup = async (id: string) => {
     try {
       if (USE_MOCK_DATA) {
+        // Mock mode: delete locally
+        setGroups(prev => prev.filter(g => g.id !== id));
         toast({
-          title: "Mock Mode",
-          description: "Configure Firebase to enable group deletion",
-          variant: "destructive",
+          title: "Group deleted",
+          description: "Group has been deleted successfully (mock mode)",
         });
         return;
       }
