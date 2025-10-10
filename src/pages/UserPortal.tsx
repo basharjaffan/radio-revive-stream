@@ -57,16 +57,17 @@ const UserPortal = () => {
       </div>
 
       <div className="grid gap-6">
-        {/* Device/Group Selection */}
+        {/* Playback Controls */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Radio className="h-5 w-5" />
-              Select Device or Group
+              <Play className="h-5 w-5" />
+              Music Control
             </CardTitle>
-            <CardDescription>Choose what you want to control</CardDescription>
+            <CardDescription>Select and control your music</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
+            {/* Device/Group Selection */}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="device-select">Device</Label>
@@ -112,19 +113,8 @@ const UserPortal = () => {
                 </Select>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Playback Controls */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Play className="h-5 w-5" />
-              Playback Controls
-            </CardTitle>
-            <CardDescription>Control music playback</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
+            {/* Playback Buttons */}
             <div className="grid grid-cols-3 gap-3">
               <Button
                 size="lg"
@@ -185,43 +175,10 @@ const UserPortal = () => {
                 <Volume2 className="h-5 w-5 text-muted-foreground" />
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Stream URL Control */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Volume2 className="h-5 w-5" />
-              Stream URL
-            </CardTitle>
-            <CardDescription>Enter a stream URL to play</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="stream-url">Stream URL</Label>
-              <Input
-                id="stream-url"
-                type="url"
-                placeholder="https://example.com/stream.mp3"
-                value={streamUrl}
-                onChange={(e) => setStreamUrl(e.target.value)}
-              />
-            </div>
-
-            <Button
-              onClick={handlePlayUrl}
-              disabled={!streamUrl || (!selectedDevice && !selectedGroup)}
-              className="w-full"
-              size="lg"
-            >
-              <Play className="mr-2 h-5 w-5" />
-              Set URL and Play
-            </Button>
 
             {!selectedDevice && !selectedGroup && (
               <p className="text-sm text-muted-foreground text-center">
-                Select a device or group first
+                Select a device or group to start
               </p>
             )}
           </CardContent>
