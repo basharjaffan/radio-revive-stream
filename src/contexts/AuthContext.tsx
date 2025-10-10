@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, signInAnonymously, signOut as firebaseSignOut } from 'firebase/auth';
 
 interface AuthContextType {
   user: { displayName?: string; email?: string } | null;
@@ -9,10 +11,22 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user] = useState<{ displayName?: string; email?: string } | null>({
-    displayName: 'Admin User',
-    email: 'admin@radiorevival.com'
-  });
+  const [user, setUser] = useState<{ displayName?: string; email?: string } | null>(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+      if (!fbUser) {
+        try {
+          await signInAnonymously(auth);
+        } catch (e) {
+          console.error('Anonymous sign-in failed', e);
+        }
+        return;
+      }
+      setUser({ displayName: fbUser.displayName || 'Anonymous', email: fbUser.email || undefined });
+    });
+    return () => unsub();
+  }, []);
 
   const signOut = async () => {
     toast({
