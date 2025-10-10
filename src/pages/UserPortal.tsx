@@ -37,10 +37,10 @@ const UserPortal = () => {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">User Portal</h1>
-        <p className="text-muted-foreground">Control your radio devices and groups</p>
+    <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold tracking-tight mb-2">Radio Control</h1>
+        <p className="text-muted-foreground">Choose a device or group to control the music</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

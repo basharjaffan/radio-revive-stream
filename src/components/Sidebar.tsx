@@ -3,14 +3,13 @@ import { cn } from '@/lib/utils';
 import { Radio, Boxes, Users, Settings, Activity, FileText, Headphones, Database } from 'lucide-react';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: Activity },
-  { name: 'Devices', href: '/devices', icon: Radio },
-  { name: 'Groups', href: '/groups', icon: Boxes },
-  { name: 'Users', href: '/users', icon: Users },
-  { name: 'Logs', href: '/logs', icon: FileText },
-  { name: 'User Portal', href: '/portal', icon: Headphones },
-  { name: 'Firebase Setup', href: '/firebase-setup', icon: Database },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Dashboard', href: '/admin', icon: Activity },
+  { name: 'Devices', href: '/admin/devices', icon: Radio },
+  { name: 'Groups', href: '/admin/groups', icon: Boxes },
+  { name: 'Users', href: '/admin/users', icon: Users },
+  { name: 'Logs', href: '/admin/logs', icon: FileText },
+  { name: 'Firebase Setup', href: '/admin/firebase-setup', icon: Database },
+  { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export const Sidebar = () => {
