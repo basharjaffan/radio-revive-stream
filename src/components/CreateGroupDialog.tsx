@@ -30,7 +30,7 @@ const createGroupSchema = z.object({
     .trim()
     .min(1, { message: "Group name is required" })
     .max(50, { message: "Group name must be less than 50 characters" }),
-  deviceIds: z.array(z.string()).min(1, { message: "Select at least one device" }),
+  deviceIds: z.array(z.string()),
   streamUrl: z.string().url().optional().or(z.literal('')),
 });
 
@@ -138,9 +138,9 @@ export function CreateGroupDialog({
               render={() => (
                 <FormItem>
                   <div className="mb-4">
-                    <FormLabel>Select Devices</FormLabel>
+                    <FormLabel>Select Devices (Optional)</FormLabel>
                     <FormDescription>
-                      Choose which devices to include in this group.
+                      Choose which devices to include in this group. You can add devices later.
                     </FormDescription>
                   </div>
                   <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-md p-3">
