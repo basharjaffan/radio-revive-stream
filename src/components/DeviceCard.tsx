@@ -128,6 +128,7 @@ export const DeviceCard = ({ device, onCommand, onConfigure }: DeviceCardProps) 
                 onClick={() => onConfigure(device.id)}
                 disabled={device.status === 'offline'}
                 variant="outline"
+                title="Device settings"
               >
                 <Settings className="h-4 w-4" />
               </Button>

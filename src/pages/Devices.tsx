@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DeviceCard } from '@/components/DeviceCard';
 import { ConfigureDeviceDialog } from '@/components/ConfigureDeviceDialog';
+import { AddDeviceDialog } from '@/components/AddDeviceDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -9,14 +10,16 @@ import { Plus, Search, AlertCircle } from 'lucide-react';
 import { useDevices } from '@/hooks/useDevices';
 import { useGroups } from '@/hooks/useGroups';
 import { Device } from '@/types/device';
+import { toast } from 'sonner';
 
 const Devices = () => {
-  const { devices, loading, sendCommand, updateDevice } = useDevices();
+  const { devices, loading, sendCommand, updateDevice, createDevice } = useDevices();
   const { groups } = useGroups();
   const [searchQuery, setSearchQuery] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [configureDevice, setConfigureDevice] = useState<Device | null>(null);
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const unconfiguredDevices = devices.filter(d => d.status === 'unconfigured');
   const configuredDevices = devices.filter(d => d.status !== 'unconfigured');
@@ -55,7 +58,17 @@ const Devices = () => {
   };
 
   const handleAddDevice = () => {
-    // TODO: Open add device modal/dialog
+    setAddDialogOpen(true);
+  };
+
+  const handleCreateDevice = async (data: { name: string; ipAddress: string }) => {
+    await createDevice({
+      name: data.name,
+      ipAddress: data.ipAddress,
+      status: 'unconfigured',
+      lastSeen: new Date(),
+      wifiConfigured: false,
+    });
   };
 
   const handleBatch = async (command: string) => {
@@ -165,6 +178,12 @@ const Devices = () => {
         onOpenChange={setConfigDialogOpen}
         onConfigure={handleConfigureSubmit}
         groups={groups}
+      />
+
+      <AddDeviceDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        onCreate={handleCreateDevice}
       />
     </div>
   );

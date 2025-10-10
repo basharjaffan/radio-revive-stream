@@ -1,16 +1,27 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Radio, Calendar, RotateCw } from 'lucide-react';
+import { CreateGroupDialog } from '@/components/CreateGroupDialog';
+import { Plus, Radio, Calendar } from 'lucide-react';
 import { useGroups } from '@/hooks/useGroups';
 import { useDevices } from '@/hooks/useDevices';
+import { useState } from 'react';
 
 const Groups = () => {
-  const { groups, loading } = useGroups();
+  const { groups, loading, createGroup } = useGroups();
   const { devices, sendCommand } = useDevices();
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const handleAddGroup = () => {
-    // TODO: Open add group modal
+    setCreateDialogOpen(true);
+  };
+
+  const handleCreateGroup = async (data: { name: string; deviceIds: string[] }) => {
+    await createGroup({
+      name: data.name,
+      deviceIds: data.deviceIds,
+      createdAt: new Date(),
+    });
   };
 
   const handleGroupCommand = async (groupId: string, command: string) => {
@@ -129,6 +140,13 @@ const Groups = () => {
           </div>
         </div>
       )}
+
+      <CreateGroupDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onCreate={handleCreateGroup}
+        devices={devices}
+      />
     </div>
   );
 };
