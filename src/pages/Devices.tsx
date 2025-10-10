@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { DeviceCard } from '@/components/DeviceCard';
 import { ConfigureDeviceDialog } from '@/components/ConfigureDeviceDialog';
 import { AddDeviceDialog } from '@/components/AddDeviceDialog';
+import { EditDeviceDialog } from '@/components/EditDeviceDialog';
+import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,13 +15,17 @@ import { Device } from '@/types/device';
 import { toast } from 'sonner';
 
 const Devices = () => {
-  const { devices, loading, sendCommand, updateDevice, createDevice } = useDevices();
+  const { devices, loading, sendCommand, updateDevice, createDevice, deleteDevice } = useDevices();
   const { groups } = useGroups();
   const [searchQuery, setSearchQuery] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [configureDevice, setConfigureDevice] = useState<Device | null>(null);
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDevice, setEditDevice] = useState<Device | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDeviceId, setDeleteDeviceId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const unconfiguredDevices = devices.filter(d => d.status === 'unconfigured');
   const configuredDevices = devices.filter(d => d.status !== 'unconfigured');
@@ -55,6 +61,30 @@ const Devices = () => {
       group: data.group,
       status: 'online', // Change from unconfigured to online
     });
+  };
+
+  const handleEdit = (deviceId: string) => {
+    const device = devices.find(d => d.id === deviceId);
+    if (device) {
+      setEditDevice(device);
+      setEditDialogOpen(true);
+    }
+  };
+
+  const handleEditSubmit = async (deviceId: string, data: Partial<Device>) => {
+    await updateDevice(deviceId, data);
+  };
+
+  const handleDelete = (deviceId: string) => {
+    setDeleteDeviceId(deviceId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteDeviceId) {
+      await deleteDevice(deleteDeviceId);
+      toast.success('Device deleted successfully');
+    }
   };
 
   const handleAddDevice = () => {
@@ -115,6 +145,8 @@ const Devices = () => {
                   device={device}
                   onCommand={handleCommand}
                   onConfigure={handleConfigure}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
                 />
               ))}
             </div>
@@ -156,6 +188,8 @@ const Devices = () => {
               device={device}
               onCommand={handleCommand}
               onConfigure={handleConfigure}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           </div>
         ))}
@@ -184,6 +218,22 @@ const Devices = () => {
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         onCreate={handleCreateDevice}
+      />
+
+      <EditDeviceDialog
+        device={editDevice}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onUpdate={handleEditSubmit}
+        groups={groups}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Device"
+        description="Are you sure you want to delete this device? This action cannot be undone."
       />
     </div>
   );

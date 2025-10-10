@@ -3,4 +3,5 @@ export interface DeviceGroup {
   name: string;
   deviceIds: string[];
   createdAt: Date;
+  streamUrl?: string;
 }

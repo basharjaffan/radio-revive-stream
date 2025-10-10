@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -22,10 +22,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { Device } from '@/types/device';
+import { DeviceGroup } from '@/types/group';
 import { toast } from 'sonner';
 
-const createGroupSchema = z.object({
+const editGroupSchema = z.object({
   name: z.string()
     .trim()
     .min(1, { message: "Group name is required" })
@@ -34,46 +36,59 @@ const createGroupSchema = z.object({
   streamUrl: z.string().url().optional().or(z.literal('')),
 });
 
-type CreateGroupFormData = z.infer<typeof createGroupSchema>;
+type EditGroupFormData = z.infer<typeof editGroupSchema>;
 
-interface CreateGroupDialogProps {
+interface EditGroupDialogProps {
+  group: (DeviceGroup & { streamUrl?: string }) | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreate: (data: { name: string; deviceIds: string[]; streamUrl?: string }) => Promise<void>;
+  onUpdate: (groupId: string, data: Partial<DeviceGroup & { streamUrl?: string }>) => Promise<void>;
   devices: Device[];
 }
 
-export function CreateGroupDialog({
+export function EditGroupDialog({
+  group,
   open,
   onOpenChange,
-  onCreate,
+  onUpdate,
   devices,
-}: CreateGroupDialogProps) {
+}: EditGroupDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<CreateGroupFormData>({
-    resolver: zodResolver(createGroupSchema),
+  const form = useForm<EditGroupFormData>({
+    resolver: zodResolver(editGroupSchema),
     defaultValues: {
-      name: '',
-      deviceIds: [],
-      streamUrl: '',
+      name: group?.name || '',
+      deviceIds: group?.deviceIds || [],
+      streamUrl: group?.streamUrl || '',
     },
   });
 
-  const onSubmit = async (data: CreateGroupFormData) => {
+  useEffect(() => {
+    if (group) {
+      form.reset({
+        name: group.name,
+        deviceIds: group.deviceIds,
+        streamUrl: group.streamUrl || '',
+      });
+    }
+  }, [group, form]);
+
+  const onSubmit = async (data: EditGroupFormData) => {
+    if (!group) return;
+    
     setIsSubmitting(true);
     try {
-      await onCreate({
+      await onUpdate(group.id, {
         name: data.name,
         deviceIds: data.deviceIds,
         streamUrl: data.streamUrl || undefined,
       });
       onOpenChange(false);
-      form.reset();
-      toast.success('Group created successfully');
+      toast.success('Group updated successfully');
     } catch (error) {
-      toast.error('Failed to create group');
-      console.error('Failed to create group:', error);
+      toast.error('Failed to update group');
+      console.error('Failed to update group:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -83,11 +98,11 @@ export function CreateGroupDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Group</DialogTitle>
+          <DialogTitle>Edit Group</DialogTitle>
           <DialogDescription>
-            Create a group to control multiple devices at once.
+            Update group settings, devices, and streaming URL.
           </DialogDescription>
         </DialogHeader>
 
@@ -145,38 +160,38 @@ export function CreateGroupDialog({
                   </div>
                   <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-md p-3">
                     {availableDevices.map((device) => (
-                    <FormField
-                      key={device.id}
-                      control={form.control}
-                      name="deviceIds"
-                      render={({ field }) => {
-                        return (
-                          <FormItem
-                            key={device.id}
-                            className="flex flex-row items-start space-x-3 space-y-0"
-                          >
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(device.id)}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([...field.value, device.id])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== device.id
+                      <FormField
+                        key={device.id}
+                        control={form.control}
+                        name="deviceIds"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={device.id}
+                              className="flex flex-row items-start space-x-3 space-y-0"
+                            >
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value?.includes(device.id)}
+                                  onCheckedChange={(checked) => {
+                                    return checked
+                                      ? field.onChange([...field.value, device.id])
+                                      : field.onChange(
+                                          field.value?.filter(
+                                            (value) => value !== device.id
+                                          )
                                         )
-                                      )
-                                }}
-                              />
-                            </FormControl>
-                            <div className="space-y-1 leading-none">
-                              <FormLabel className="font-normal">
-                                {device.name}
-                              </FormLabel>
-                            </div>
-                          </FormItem>
-                        )
-                      }}
+                                  }}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel className="font-normal">
+                                  {device.name}
+                                </FormLabel>
+                              </div>
+                            </FormItem>
+                          )
+                        }}
                       />
                     ))}
                   </div>
@@ -195,7 +210,7 @@ export function CreateGroupDialog({
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Creating...' : 'Create Group'}
+                {isSubmitting ? 'Updating...' : 'Update'}
               </Button>
             </DialogFooter>
           </form>

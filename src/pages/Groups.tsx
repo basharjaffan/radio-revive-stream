@@ -1,27 +1,66 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { CreateGroupDialog } from '@/components/CreateGroupDialog';
-import { Plus, Radio, Calendar } from 'lucide-react';
+import { EditGroupDialog } from '@/components/EditGroupDialog';
+import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
+import { Plus, Radio, Calendar, MoreVertical, Pencil, Trash2, Link as LinkIcon } from 'lucide-react';
 import { useGroups } from '@/hooks/useGroups';
 import { useDevices } from '@/hooks/useDevices';
-import { useState } from 'react';
+import { DeviceGroup } from '@/types/group';
+import { toast } from 'sonner';
 
 const Groups = () => {
-  const { groups, loading, createGroup } = useGroups();
+  const { groups, loading, createGroup, updateGroup, deleteGroup } = useGroups();
   const { devices, sendCommand } = useDevices();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editGroup, setEditGroup] = useState<DeviceGroup | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteGroupId, setDeleteGroupId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleAddGroup = () => {
     setCreateDialogOpen(true);
   };
 
-  const handleCreateGroup = async (data: { name: string; deviceIds: string[] }) => {
+  const handleCreateGroup = async (data: { name: string; deviceIds: string[]; streamUrl?: string }) => {
     await createGroup({
       name: data.name,
       deviceIds: data.deviceIds,
+      streamUrl: data.streamUrl,
       createdAt: new Date(),
     });
+  };
+
+  const handleEdit = (groupId: string) => {
+    const group = groups.find(g => g.id === groupId);
+    if (group) {
+      setEditGroup(group);
+      setEditDialogOpen(true);
+    }
+  };
+
+  const handleEditSubmit = async (groupId: string, data: Partial<DeviceGroup>) => {
+    await updateGroup(groupId, data);
+  };
+
+  const handleDelete = (groupId: string) => {
+    setDeleteGroupId(groupId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteGroupId) {
+      await deleteGroup(deleteGroupId);
+      toast.success('Group deleted successfully');
+    }
   };
 
   const handleGroupCommand = async (groupId: string, command: string) => {
@@ -76,10 +115,39 @@ const Groups = () => {
                     {group.deviceIds.length} {group.deviceIds.length === 1 ? 'device' : 'devices'}
                   </Badge>
                 </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleEdit(group.id)}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleDelete(group.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
+                {group.streamUrl && (
+                  <div className="flex items-start gap-2 text-sm">
+                    <LinkIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-muted-foreground">Stream URL:</p>
+                      <p className="text-foreground mt-1 truncate text-primary">{group.streamUrl}</p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-start gap-2 text-sm">
                   <Radio className="h-4 w-4 text-muted-foreground mt-0.5" />
                   <div className="flex-1">
@@ -146,6 +214,22 @@ const Groups = () => {
         onOpenChange={setCreateDialogOpen}
         onCreate={handleCreateGroup}
         devices={devices}
+      />
+
+      <EditGroupDialog
+        group={editGroup}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onUpdate={handleEditSubmit}
+        devices={devices}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Group"
+        description="Are you sure you want to delete this group? This action cannot be undone."
       />
     </div>
   );

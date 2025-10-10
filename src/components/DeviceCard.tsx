@@ -2,13 +2,21 @@ import { Device } from '@/types/device';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Settings, Activity } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Play, Pause, Settings, Activity, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface DeviceCardProps {
   device: Device;
   onCommand: (deviceId: string, command: string) => void;
   onConfigure: (deviceId: string) => void;
+  onEdit?: (deviceId: string) => void;
+  onDelete?: (deviceId: string) => void;
 }
 
 const statusConfig = {
@@ -19,7 +27,7 @@ const statusConfig = {
   paused: { label: 'Paused', variant: 'secondary' as const, icon: Pause },
 };
 
-export const DeviceCard = ({ device, onCommand, onConfigure }: DeviceCardProps) => {
+export const DeviceCard = ({ device, onCommand, onConfigure, onEdit, onDelete }: DeviceCardProps) => {
   const config = statusConfig[device.status];
   const Icon = config.icon;
 
@@ -60,10 +68,38 @@ export const DeviceCard = ({ device, onCommand, onConfigure }: DeviceCardProps) 
             <CardTitle className="text-lg">{device.name}</CardTitle>
             <p className="text-sm text-muted-foreground">{device.id}</p>
           </div>
-          <Badge variant={config.variant} className="gap-1">
-            <Icon className="h-3 w-3" />
-            {config.label}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={config.variant} className="gap-1">
+              <Icon className="h-3 w-3" />
+              {config.label}
+            </Badge>
+            {(onEdit || onDelete) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onEdit && (
+                    <DropdownMenuItem onClick={() => onEdit(device.id)}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <DropdownMenuItem 
+                      onClick={() => onDelete(device.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
