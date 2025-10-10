@@ -1,15 +1,25 @@
 import { useState } from 'react';
 import { DeviceCard } from '@/components/DeviceCard';
+import { ConfigureDeviceDialog } from '@/components/ConfigureDeviceDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Search } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, Search, AlertCircle } from 'lucide-react';
 import { useDevices } from '@/hooks/useDevices';
+import { useGroups } from '@/hooks/useGroups';
+import { Device } from '@/types/device';
 
 const Devices = () => {
-  const { devices, loading, sendCommand } = useDevices();
+  const { devices, loading, sendCommand, updateDevice } = useDevices();
+  const { groups } = useGroups();
   const [searchQuery, setSearchQuery] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [configureDevice, setConfigureDevice] = useState<Device | null>(null);
+  const [configDialogOpen, setConfigDialogOpen] = useState(false);
+
+  const unconfiguredDevices = devices.filter(d => d.status === 'unconfigured');
+  const configuredDevices = devices.filter(d => d.status !== 'unconfigured');
 
   const toggleSelected = (id: string, checked: boolean) => {
     setSelected(prev => {
@@ -19,7 +29,7 @@ const Devices = () => {
     });
   };
 
-  const filteredDevices = devices.filter(device =>
+  const filteredDevices = configuredDevices.filter(device =>
     device.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     device.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -29,7 +39,19 @@ const Devices = () => {
   };
 
   const handleConfigure = (deviceId: string) => {
-    // TODO: Open configuration modal/dialog
+    const device = devices.find(d => d.id === deviceId);
+    if (device) {
+      setConfigureDevice(device);
+      setConfigDialogOpen(true);
+    }
+  };
+
+  const handleConfigureSubmit = async (deviceId: string, data: { name: string; group?: string }) => {
+    await updateDevice(deviceId, {
+      name: data.name,
+      group: data.group,
+      status: 'online', // Change from unconfigured to online
+    });
   };
 
   const handleAddDevice = () => {
@@ -60,6 +82,32 @@ const Devices = () => {
           Add Device
         </Button>
       </div>
+
+      {unconfiguredDevices.length > 0 && (
+        <Card className="border-orange-500/50 bg-orange-500/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+              <AlertCircle className="h-5 w-5" />
+              Unconfigured Devices ({unconfiguredDevices.length})
+            </CardTitle>
+            <CardDescription>
+              These devices need to be configured before they can be used
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {unconfiguredDevices.map(device => (
+                <DeviceCard
+                  key={device.id}
+                  device={device}
+                  onCommand={handleCommand}
+                  onConfigure={handleConfigure}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
@@ -110,6 +158,14 @@ const Devices = () => {
           </div>
         </div>
       )}
+
+      <ConfigureDeviceDialog
+        device={configureDevice}
+        open={configDialogOpen}
+        onOpenChange={setConfigDialogOpen}
+        onConfigure={handleConfigureSubmit}
+        groups={groups}
+      />
     </div>
   );
 };
