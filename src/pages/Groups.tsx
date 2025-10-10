@@ -15,7 +15,6 @@ import { Plus, Radio, Calendar, MoreVertical, Pencil, Trash2, Link as LinkIcon }
 import { useGroups } from '@/hooks/useGroups';
 import { useDevices } from '@/hooks/useDevices';
 import { DeviceGroup } from '@/types/group';
-import { toast } from 'sonner';
 
 const Groups = () => {
   const { groups, loading, createGroup, updateGroup, deleteGroup } = useGroups();
@@ -59,7 +58,6 @@ const Groups = () => {
   const handleDeleteConfirm = async () => {
     if (deleteGroupId) {
       await deleteGroup(deleteGroupId);
-      toast.success('Group deleted successfully');
     }
   };
 

@@ -23,7 +23,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Device } from '@/types/device';
-import { toast } from 'sonner';
 
 const createGroupSchema = z.object({
   name: z.string()
@@ -70,9 +69,7 @@ export function CreateGroupDialog({
       });
       onOpenChange(false);
       form.reset();
-      toast.success('Group created successfully');
     } catch (error) {
-      toast.error('Failed to create group');
       console.error('Failed to create group:', error);
     } finally {
       setIsSubmitting(false);

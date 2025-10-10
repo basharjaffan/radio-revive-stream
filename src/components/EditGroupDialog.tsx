@@ -25,7 +25,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Device } from '@/types/device';
 import { DeviceGroup } from '@/types/group';
-import { toast } from 'sonner';
 
 const editGroupSchema = z.object({
   name: z.string()
@@ -85,9 +84,7 @@ export function EditGroupDialog({
         streamUrl: data.streamUrl || undefined,
       });
       onOpenChange(false);
-      toast.success('Group updated successfully');
     } catch (error) {
-      toast.error('Failed to update group');
       console.error('Failed to update group:', error);
     } finally {
       setIsSubmitting(false);
