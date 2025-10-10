@@ -45,21 +45,55 @@ const UserPortal = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Device Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="device-select">Select Device</Label>
-              <Select value={selectedDevice} onValueChange={setSelectedDevice}>
-                <SelectTrigger id="device-select">
-                  <SelectValue placeholder="Choose a device" />
-                </SelectTrigger>
-                <SelectContent>
-                  {devices.filter(d => d.status !== 'unconfigured').map(device => (
-                    <SelectItem key={device.id} value={device.id}>
-                      {device.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={selectedDevice} onValueChange={setSelectedDevice}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose a device" />
+              </SelectTrigger>
+              <SelectContent>
+                {devices.filter(d => d.status !== 'unconfigured').map(device => (
+                  <SelectItem key={device.id} value={device.id}>
+                    {device.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Device Info */}
+            {selectedDevice && (() => {
+              const device = devices.find(d => d.id === selectedDevice);
+              if (!device) return null;
+              
+              const formatUptime = (seconds?: number) => {
+                if (!seconds) return 'N/A';
+                const days = Math.floor(seconds / 86400);
+                const hours = Math.floor((seconds % 86400) / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                if (days > 0) return `${days}d ${hours}h`;
+                if (hours > 0) return `${hours}h ${minutes}m`;
+                return `${minutes}m`;
+              };
+
+              const getSourceText = (source?: 'url' | 'local' | 'none') => {
+                switch (source) {
+                  case 'url': return '🌐 Streaming from URL';
+                  case 'local': return '💿 Playing local files';
+                  default: return '⏸️ No source';
+                }
+              };
+
+              return (
+                <div className="rounded-lg border bg-muted/50 p-3 space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Uptime:</span>
+                    <span className="font-medium">{formatUptime(device.uptime)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Source:</span>
+                    <span className="font-medium">{getSourceText(device.currentSource)}</span>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Playback Buttons */}
             <div className="grid grid-cols-3 gap-3">

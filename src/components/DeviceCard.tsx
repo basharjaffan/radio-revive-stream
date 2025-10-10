@@ -31,6 +31,24 @@ export const DeviceCard = ({ device, onCommand, onConfigure }: DeviceCardProps) 
     return `${Math.floor(seconds / 86400)}d ago`;
   };
 
+  const formatUptime = (seconds?: number) => {
+    if (!seconds) return 'N/A';
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
+
+  const getSourceText = (source?: 'url' | 'local' | 'none') => {
+    switch (source) {
+      case 'url': return '🌐 URL Stream';
+      case 'local': return '💿 Local Files';
+      default: return '⏸️ None';
+    }
+  };
+
   return (
     <Card className={cn(
       "transition-all duration-300 hover:shadow-lg hover:shadow-primary/20",
@@ -60,6 +78,14 @@ export const DeviceCard = ({ device, onCommand, onConfigure }: DeviceCardProps) 
             <span className="text-muted-foreground">Last Seen:</span>
             <span>{formatLastSeen(device.lastSeen)}</span>
           </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Uptime:</span>
+            <span className="font-medium">{formatUptime(device.uptime)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Source:</span>
+            <span className="font-medium">{getSourceText(device.currentSource)}</span>
+          </div>
           {device.firmwareVersion && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">Firmware:</span>
@@ -68,7 +94,7 @@ export const DeviceCard = ({ device, onCommand, onConfigure }: DeviceCardProps) 
           )}
           {device.currentUrl && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Stream:</span>
+              <span className="text-muted-foreground">Stream URL:</span>
               <span className="truncate max-w-[150px] text-primary">{device.currentUrl}</span>
             </div>
           )}

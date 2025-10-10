@@ -10,6 +10,8 @@ export interface Device {
   currentUrl?: string;
   firmwareVersion?: string;
   group?: string;
+  uptime?: number; // in seconds
+  currentSource?: 'url' | 'local' | 'none';
 }
 
 export interface DeviceCommand {
