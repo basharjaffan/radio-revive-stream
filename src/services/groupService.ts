@@ -40,17 +40,25 @@ export const groupService = {
   // Create group
   createGroup: async (group: Omit<DeviceGroup, 'id'>): Promise<string> => {
     const groupsRef = collection(db, GROUPS_COLLECTION);
-    const docRef = await addDoc(groupsRef, {
-      ...group,
+    const payload: any = {
+      name: group.name,
+      deviceIds: group.deviceIds || [],
       createdAt: Timestamp.fromDate(group.createdAt),
-    });
+    };
+    if (group.streamUrl && group.streamUrl.trim() !== '') {
+      payload.streamUrl = group.streamUrl;
+    }
+    const docRef = await addDoc(groupsRef, payload);
     return docRef.id;
   },
 
   // Update group
   updateGroup: async (id: string, data: Partial<DeviceGroup>): Promise<void> => {
     const groupRef = doc(db, GROUPS_COLLECTION, id);
-    const updateData: any = { ...data };
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.deviceIds !== undefined) updateData.deviceIds = data.deviceIds;
+    if (data.streamUrl !== undefined) updateData.streamUrl = data.streamUrl;
     if (data.createdAt) {
       updateData.createdAt = Timestamp.fromDate(data.createdAt);
     }

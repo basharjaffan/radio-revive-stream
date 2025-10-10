@@ -19,13 +19,23 @@ export const useDevices = () => {
       return;
     }
 
-    const unsubscribe = deviceService.subscribeToDevices((updatedDevices) => {
-      setDevices(updatedDevices);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    loadDevices();
   }, []);
+
+  const loadDevices = async () => {
+    try {
+      const data = await deviceService.getDevices();
+      setDevices(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load devices",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const createDevice = async (device: Omit<Device, 'id'>) => {
     try {
@@ -43,6 +53,7 @@ export const useDevices = () => {
         return;
       }
       await deviceService.createDevice(device);
+      await loadDevices();
       toast({
         title: "Device created",
         description: "Device has been created successfully",
@@ -68,6 +79,7 @@ export const useDevices = () => {
         return;
       }
       await deviceService.updateDevice(id, data);
+      await loadDevices();
       toast({
         title: "Device updated",
         description: "Device has been updated successfully",
@@ -93,6 +105,7 @@ export const useDevices = () => {
         return;
       }
       await deviceService.deleteDevice(id);
+      await loadDevices();
       toast({
         title: "Device deleted",
         description: "Device has been deleted successfully",
