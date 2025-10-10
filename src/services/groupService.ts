@@ -12,11 +12,13 @@ import { db } from '@/lib/firebase';
 import { DeviceGroup } from '@/types/group';
 
 const GROUPS_COLLECTION = 'groups';
+const ORGANIZATION_ID = 'lW3gnPV1P9UtMnKEyUXz';
+const ORGANIZATIONS_COLLECTION = 'organizations';
 
 export const groupService = {
   // Get all groups
   getGroups: async (): Promise<DeviceGroup[]> => {
-    const groupsRef = collection(db, GROUPS_COLLECTION);
+    const groupsRef = collection(db, ORGANIZATIONS_COLLECTION, ORGANIZATION_ID, GROUPS_COLLECTION);
     const snapshot = await getDocs(groupsRef);
     return snapshot.docs.map(doc => ({
       id: doc.id,
@@ -27,7 +29,7 @@ export const groupService = {
 
   // Get group by ID
   getGroup: async (id: string): Promise<DeviceGroup | null> => {
-    const groupRef = doc(db, GROUPS_COLLECTION, id);
+    const groupRef = doc(db, ORGANIZATIONS_COLLECTION, ORGANIZATION_ID, GROUPS_COLLECTION, id);
     const snapshot = await getDoc(groupRef);
     if (!snapshot.exists()) return null;
     return {
@@ -39,7 +41,7 @@ export const groupService = {
 
   // Create group
   createGroup: async (group: Omit<DeviceGroup, 'id'>): Promise<string> => {
-    const groupsRef = collection(db, GROUPS_COLLECTION);
+    const groupsRef = collection(db, ORGANIZATIONS_COLLECTION, ORGANIZATION_ID, GROUPS_COLLECTION);
     const payload: any = {
       name: group.name,
       deviceIds: group.deviceIds || [],
@@ -54,7 +56,7 @@ export const groupService = {
 
   // Update group
   updateGroup: async (id: string, data: Partial<DeviceGroup>): Promise<void> => {
-    const groupRef = doc(db, GROUPS_COLLECTION, id);
+    const groupRef = doc(db, ORGANIZATIONS_COLLECTION, ORGANIZATION_ID, GROUPS_COLLECTION, id);
     const updateData: any = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.deviceIds !== undefined) updateData.deviceIds = data.deviceIds;
@@ -67,13 +69,13 @@ export const groupService = {
 
   // Delete group
   deleteGroup: async (id: string): Promise<void> => {
-    const groupRef = doc(db, GROUPS_COLLECTION, id);
+    const groupRef = doc(db, ORGANIZATIONS_COLLECTION, ORGANIZATION_ID, GROUPS_COLLECTION, id);
     await deleteDoc(groupRef);
   },
 
   // Send command to group
   sendGroupCommand: async (groupId: string, command: string, params?: any): Promise<void> => {
-    const commandsRef = collection(db, 'commands');
+    const commandsRef = collection(db, ORGANIZATIONS_COLLECTION, ORGANIZATION_ID, 'commands');
     await addDoc(commandsRef, {
       groupId,
       command,
