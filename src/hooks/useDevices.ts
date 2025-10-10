@@ -5,7 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { mockDevices } from '@/lib/mockData';
 
 // Use mock data until Firebase is properly configured
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 export const useDevices = () => {
   const [devices, setDevices] = useState<Device[]>([]);
