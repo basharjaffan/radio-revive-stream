@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useData } from '@/contexts/DataContext';
 import { Play, Pause, RotateCw, Volume2, VolumeX } from 'lucide-react';
+import { CommandParameters, DeviceCommandName } from '@/types/device';
 
 const UserPortal = () => {
   const { devices, sendCommand } = useData();
@@ -13,13 +14,10 @@ const UserPortal = () => {
   const availableDevices = devices.filter(d => d.status !== 'unconfigured');
   const device = availableDevices[0];
 
-  useEffect(() => {
-    if (device?.uptime) {
-      // Update component when device changes
-    }
-  }, [device?.id]);
-
-  const handleCommand = async (command: string, params?: any) => {
+  const handleCommand = async (
+    command: DeviceCommandName,
+    params?: CommandParameters,
+  ) => {
     if (!device) return;
     await sendCommand(device.id, command, params);
   };

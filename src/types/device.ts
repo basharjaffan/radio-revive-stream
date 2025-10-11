@@ -1,5 +1,13 @@
 export type DeviceStatus = 'online' | 'offline' | 'unconfigured' | 'playing' | 'paused';
 
+export type DeviceCommandName = 'play' | 'pause' | 'stop' | 'set_url' | 'set_volume' | 'reboot';
+
+export type CommandParameters = {
+  url?: string;
+  volume?: number;
+  [key: string]: unknown;
+};
+
 export interface Device {
   id: string;
   name: string;
@@ -16,7 +24,7 @@ export interface Device {
 
 export interface DeviceCommand {
   deviceId: string;
-  command: 'play' | 'pause' | 'stop' | 'set_url';
+  command: DeviceCommandName;
   url?: string;
   timestamp: Date;
 }

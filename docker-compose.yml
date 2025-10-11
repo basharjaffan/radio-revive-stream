@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+  mqtt:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - '1883:1883'
+      - '9001:9001'
+    volumes:
+      - ./docker/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - backend/.env.example
+    depends_on:
+      - mqtt
+    ports:
+      - '4000:4000'
+
+  rpi-agent:
+    build:
+      context: ./rpi-agent
+      dockerfile: Dockerfile
+    env_file:
+      - rpi-agent/.env.example
+    depends_on:
+      - mqtt
+    deploy:
+      replicas: 0

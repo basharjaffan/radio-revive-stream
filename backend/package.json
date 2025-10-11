@@ -1,0 +1,33 @@
+{
+  "name": "radio-revive-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "dev": "tsx watch src/main.ts",
+    "lint": "eslint 'src/**/*.{ts,tsx}'"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.1",
+    "@fastify/helmet": "^12.1.1",
+    "@fastify/rate-limit": "^9.0.0",
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^12.0.0",
+    "mqtt": "^5.3.4",
+    "pino": "^8.17.0",
+    "pino-pretty": "^10.2.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.2"
+  }
+}

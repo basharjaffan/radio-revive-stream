@@ -13,7 +13,7 @@ import {
   onSnapshot
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Device, DeviceStatus } from '@/types/device';
+import { CommandParameters, Device, DeviceCommandName } from '@/types/device';
 
 const DEVICES_COLLECTION = 'devices';
 const ORGANIZATION_ID = 'LdpwUPcwIFUZjIwYph8Z';
@@ -56,7 +56,7 @@ export const deviceService = {
   // Update device
   updateDevice: async (id: string, data: Partial<Device>): Promise<void> => {
     const deviceRef = doc(db, ORGANIZATIONS_COLLECTION, ORGANIZATION_ID, DEVICES_COLLECTION, id);
-    const updateData: any = { ...data };
+    const updateData: Record<string, unknown> = { ...data };
     if (data.lastSeen) {
       updateData.lastSeen = Timestamp.fromDate(data.lastSeen);
     }
@@ -83,7 +83,11 @@ export const deviceService = {
   },
 
   // Send command to device
-  sendCommand: async (deviceId: string, command: string, params?: any): Promise<void> => {
+  sendCommand: async (
+    deviceId: string,
+    command: DeviceCommandName,
+    params?: CommandParameters,
+  ): Promise<void> => {
     const commandsRef = collection(db, ORGANIZATIONS_COLLECTION, ORGANIZATION_ID, 'commands');
     await addDoc(commandsRef, {
       deviceId,

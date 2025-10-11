@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DeviceGroup } from '@/types/group';
+import { CommandParameters, DeviceCommandName } from '@/types/device';
 import { groupService } from '@/services/groupService';
 import { toast } from '@/hooks/use-toast';
 import { mockGroups } from '@/lib/mockData';
@@ -121,7 +122,11 @@ export const useGroups = () => {
     }
   };
 
-  const sendGroupCommand = async (groupId: string, command: string, params?: any) => {
+  const sendGroupCommand = async (
+    groupId: string,
+    command: DeviceCommandName,
+    params?: CommandParameters,
+  ) => {
     try {
       if (USE_MOCK_DATA) {
         toast({

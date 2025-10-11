@@ -53,7 +53,7 @@ export const userService = {
   // Update user
   updateUser: async (id: string, data: Partial<User>): Promise<void> => {
     const userRef = doc(db, USERS_COLLECTION, id);
-    const updateData: any = { ...data };
+    const updateData: Record<string, unknown> = { ...data };
     if (data.createdAt) {
       updateData.createdAt = Timestamp.fromDate(data.createdAt);
     }

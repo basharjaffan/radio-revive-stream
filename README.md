@@ -59,10 +59,47 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Firebase (Firestore & Auth)
+
+## Backend, device fleet and database architecture
+
+The repository now ships with an opinionated reference backend in the [`backend/`](backend/) directory that bridges MQTT-connected Raspberry Pis with Firebase. The high-level flow is:
+
+1. **Raspberry Pi update agent** (see [`rpi-agent/`](rpi-agent/)) publishes status heartbeats and listens for commands via MQTT.
+2. **MQTT broker** (Mosquitto/EMQX) relays traffic between the devices and backend.
+3. **Backend service** connects to the broker, persists device status to Firestore, and relays pending commands back to devices.
+4. **React frontend** reads from Firestore via Firebase SDKs and allows operators to queue commands, which the backend observes and forwards to devices.
+
+The backend is built with Fastify, Firebase Admin and the `mqtt` client. Environment variables are documented in [`backend/.env.example`](backend/.env.example). Running `npm install` followed by `npm run dev` inside the `backend` directory will start a local development server that exposes `/health` and `/config/mqtt` endpoints while streaming MQTT messages to/from Firestore.
+
+### Firebase data shape
+
+The backend and frontend expect a Firestore hierarchy similar to:
+
+```
+organizations/{organizationId}
+  devices/{deviceId}
+  commands/{commandId}
+```
+
+- Devices publish heartbeats on `devices/{deviceId}/status` topics with payloads matching `DeviceStatusPayload`.
+- Commands are written to `organizations/{orgId}/commands` with `status: "pending"`; the backend publishes them to MQTT and marks them as `sent` or `failed`.
+
+Update [`FIREBASE_SETUP.md`](FIREBASE_SETUP.md) with project-specific collection rules when provisioning your Firebase project.
+
+See [`docs/architecture.md`](docs/architecture.md) for a full picture of how the Raspberry Pi agents, MQTT broker, backend and frontend communicate.
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/dc8295f4-1289-4e7f-bb79-233a61d21d7c) and click on Share -> Publish.
+For frontend-only deployments you can still open [Lovable](https://lovable.dev/projects/dc8295f4-1289-4e7f-bb79-233a61d21d7c) and click on Share -> Publish.
+
+To run the complete stack locally (frontend, backend, MQTT and a sample agent) you can use Docker Compose:
+
+```sh
+docker compose up --build
+```
+
+This starts Mosquitto on `1883`, the backend on `4000`, and an optional Raspberry Pi agent container (scale it up via `docker compose up --scale rpi-agent=2`). Provide real secrets by copying `.env.example` files to `.env` before launching.
 
 ## Can I connect a custom domain to my Lovable project?
 

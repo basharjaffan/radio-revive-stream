@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Device } from '@/types/device';
+import { CommandParameters, Device, DeviceCommandName } from '@/types/device';
 import { deviceService } from '@/services/deviceService';
 import { toast } from '@/hooks/use-toast';
 import { mockDevices } from '@/lib/mockData';
@@ -119,7 +119,11 @@ export const useDevices = () => {
     }
   };
 
-  const sendCommand = async (deviceId: string, command: string, params?: any) => {
+  const sendCommand = async (
+    deviceId: string,
+    command: DeviceCommandName,
+    params?: CommandParameters,
+  ) => {
     try {
       if (USE_MOCK_DATA) {
         // Simulate command in mock mode
@@ -131,10 +135,15 @@ export const useDevices = () => {
           setDevices((prev) =>
             prev.map((d) => (d.id === deviceId ? { ...d, status: 'paused' as const, lastSeen: new Date() } : d)),
           );
-        } else if (command === 'set_url' && params?.url) {
+        } else if (command === 'set_url' && typeof params?.url === 'string') {
           setDevices((prev) =>
             prev.map((d) => (d.id === deviceId ? { ...d, currentUrl: params.url, lastSeen: new Date() } : d)),
           );
+        } else if (command === 'set_volume' && typeof params?.volume === 'number') {
+          toast({
+            title: "Volume updated",
+            description: `Volume set to ${params.volume}% (mock mode)`,
+          });
         } else if (command === 'reboot') {
           // Briefly set to offline, then back online (or playing if it was)
           let previousStatus: Device['status'] | null = null;

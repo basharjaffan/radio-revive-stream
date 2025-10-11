@@ -4,7 +4,19 @@
 
 Gå till Firebase Console → Firestore Database → Start collection
 
-### Collection: `devices`
+> **Ny struktur:** Backenden förlitar sig på att alla enheter och kommandon ligger under `organizations/{organizationId}`. Börja därför med att skapa en `organizations` collection och lägg dina befintliga samlingar som undersamlingar.
+
+### Collection: `organizations`
+Skapa ett organisationdokument och lägg till en undersamling `devices`:
+
+```json
+{
+  "name": "Demo Organization",
+  "createdAt": "2024-01-01T00:00:00Z"
+}
+```
+
+#### Subcollection: `devices`
 Skapa första dokumentet med denna struktur:
 ```json
 {
@@ -39,7 +51,8 @@ Skapa första dokumentet med denna struktur:
 }
 ```
 
-### Collection: `commands`
+### Subcollection: `commands`
+Under respektive organisation, skapa en undersamling `commands`:
 ```json
 {
   "deviceId": "device-id-1",
@@ -85,25 +98,47 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // Devices collection
-    match /devices/{deviceId} {
-      // Validate device data
-      function validDevice() {
-        let data = request.resource.data;
-        return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
-               data.status in ['online', 'offline', 'unconfigured', 'playing', 'paused'] &&
-               data.wifiConfigured is bool &&
-               (data.firmwareVersion == null || (data.firmwareVersion is string && data.firmwareVersion.size() <= 20)) &&
-               (data.ipAddress == null || (data.ipAddress is string && data.ipAddress.size() <= 45)) &&
-               (data.currentUrl == null || (data.currentUrl is string && data.currentUrl.size() <= 500));
-      }
-      
+    // Organizations collection
+    match /organizations/{orgId} {
       allow read: if isSignedIn();
-      allow create: if isAdmin() && validDevice();
-      allow update: if isAdmin() && validDevice();
-      allow delete: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+
+      // Devices subcollection
+      match /devices/{deviceId} {
+        // Validate device data
+        function validDevice() {
+          let data = request.resource.data;
+          return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+                 data.status in ['online', 'offline', 'unconfigured', 'playing', 'paused'] &&
+                 data.wifiConfigured is bool &&
+                 (data.firmwareVersion == null || (data.firmwareVersion is string && data.firmwareVersion.size() <= 20)) &&
+                 (data.ipAddress == null || (data.ipAddress is string && data.ipAddress.size() <= 45)) &&
+                 (data.currentUrl == null || (data.currentUrl is string && data.currentUrl.size() <= 500));
+        }
+
+        allow read: if isSignedIn();
+        allow create: if isAdmin() && validDevice();
+        allow update: if isAdmin() && validDevice();
+        allow delete: if isAdmin();
+      }
+
+      // Commands subcollection
+      match /commands/{commandId} {
+        function validCommand() {
+          let data = request.resource.data;
+          return data.command is string && data.command.size() > 0 && data.command.size() <= 50 &&
+                 data.status in ['pending', 'sent', 'completed', 'failed'] &&
+                 (data.deviceId is string || data.groupId is string);
+        }
+
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && validCommand();
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
+      }
     }
-    
+
     // Groups collection
     match /groups/{groupId} {
       function validGroup() {
@@ -111,25 +146,10 @@ service cloud.firestore {
         return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
                data.deviceIds is list && data.deviceIds.size() <= 50;
       }
-      
+
       allow read: if isSignedIn();
       allow create: if isAdmin() && validGroup();
       allow update: if isAdmin() && validGroup();
-      allow delete: if isAdmin();
-    }
-    
-    // Commands collection
-    match /commands/{commandId} {
-      function validCommand() {
-        let data = request.resource.data;
-        return data.command is string && data.command.size() > 0 && data.command.size() <= 50 &&
-               data.status in ['pending', 'sent', 'completed', 'failed'] &&
-               (data.deviceId is string || data.groupId is string);
-      }
-      
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && validCommand();
-      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
   }

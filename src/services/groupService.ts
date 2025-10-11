@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { DeviceGroup } from '@/types/group';
+import { CommandParameters, DeviceCommandName } from '@/types/device';
 
 const GROUPS_COLLECTION = 'groups';
 const ORGANIZATION_ID = 'lW3gnPV1P9UtMnKEyUXz';
@@ -42,7 +43,7 @@ export const groupService = {
   // Create group
   createGroup: async (group: Omit<DeviceGroup, 'id'>): Promise<string> => {
     const groupsRef = collection(db, ORGANIZATIONS_COLLECTION, ORGANIZATION_ID, GROUPS_COLLECTION);
-    const payload: any = {
+    const payload: Record<string, unknown> = {
       name: group.name,
       deviceIds: group.deviceIds || [],
       createdAt: Timestamp.fromDate(group.createdAt),
@@ -57,7 +58,7 @@ export const groupService = {
   // Update group
   updateGroup: async (id: string, data: Partial<DeviceGroup>): Promise<void> => {
     const groupRef = doc(db, ORGANIZATIONS_COLLECTION, ORGANIZATION_ID, GROUPS_COLLECTION, id);
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.deviceIds !== undefined) updateData.deviceIds = data.deviceIds;
     if (data.streamUrl !== undefined) updateData.streamUrl = data.streamUrl;
@@ -74,7 +75,11 @@ export const groupService = {
   },
 
   // Send command to group
-  sendGroupCommand: async (groupId: string, command: string, params?: any): Promise<void> => {
+  sendGroupCommand: async (
+    groupId: string,
+    command: DeviceCommandName,
+    params?: CommandParameters,
+  ): Promise<void> => {
     const commandsRef = collection(db, ORGANIZATIONS_COLLECTION, ORGANIZATION_ID, 'commands');
     await addDoc(commandsRef, {
       groupId,

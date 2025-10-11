@@ -1,5 +1,5 @@
 import { createContext, useContext, ReactNode } from 'react';
-import { Device } from '@/types/device';
+import { CommandParameters, Device, DeviceCommandName } from '@/types/device';
 import { DeviceGroup } from '@/types/group';
 import { User } from '@/types/user';
 import { useDevices } from '@/hooks/useDevices';
@@ -13,7 +13,11 @@ interface DataContextType {
   createDevice: (device: Omit<Device, 'id'>) => Promise<void>;
   updateDevice: (id: string, data: Partial<Device>) => Promise<void>;
   deleteDevice: (id: string) => Promise<void>;
-  sendCommand: (deviceId: string, command: string, params?: any) => Promise<void>;
+  sendCommand: (
+    deviceId: string,
+    command: DeviceCommandName,
+    params?: CommandParameters,
+  ) => Promise<void>;
   
   // Groups
   groups: DeviceGroup[];
@@ -21,7 +25,11 @@ interface DataContextType {
   createGroup: (group: Omit<DeviceGroup, 'id'>) => Promise<void>;
   updateGroup: (id: string, data: Partial<DeviceGroup>) => Promise<void>;
   deleteGroup: (id: string) => Promise<void>;
-  sendGroupCommand: (groupId: string, command: string, params?: any) => Promise<void>;
+  sendGroupCommand: (
+    groupId: string,
+    command: DeviceCommandName,
+    params?: CommandParameters,
+  ) => Promise<void>;
   
   // Users
   users: User[];
