@@ -16,3 +16,7 @@ yarn-error.log*
 *.swo
 .idea/
 .vscode/
+
+# Misc
+node
+radio-revive-rpi-agent@*
