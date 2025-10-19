@@ -18,52 +18,75 @@ const DeviceControl = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // För nu, använd mock data om ingen deviceId finns
-    const testDeviceId = deviceId || 'test-device-1';
+    // Mock enhet för att visa UI direkt
+    const mockDevice: Device = {
+      id: 'device-001',
+      name: 'Raspberry Pi Radio',
+      status: 'online',
+      lastSeen: new Date(),
+      ipAddress: '192.168.1.100',
+      currentUrl: 'https://icecast.royalstreamingplay.com/des652ab-cafc-4f13-b649-ac6888bb53d9.mp3',
+      uptime: 3600,
+      volume: 50,
+      userId: 'user-001'
+    };
 
-    // Lyssna på enhetens status i realtid
-    const unsubscribe = devicesApi.subscribeToDevice(testDeviceId, (updatedDevice) => {
-      setDevice(updatedDevice);
-      if (updatedDevice?.volume !== undefined) {
-        setVolume(updatedDevice.volume);
-      }
-      setLoading(false);
-    });
+    // Sätt mock-enheten och avsluta loading
+    setDevice(mockDevice);
+    setVolume(mockDevice.volume || 50);
+    setLoading(false);
 
-    return () => unsubscribe();
+    // Om du vill använda Firebase senare, kommentera in detta:
+    // const testDeviceId = deviceId || 'test-device-1';
+    // const unsubscribe = devicesApi.subscribeToDevice(testDeviceId, (updatedDevice) => {
+    //   setDevice(updatedDevice);
+    //   if (updatedDevice?.volume !== undefined) {
+    //     setVolume(updatedDevice.volume);
+    //   }
+    //   setLoading(false);
+    // });
+    // return () => unsubscribe();
   }, [deviceId]);
 
   const handleCommand = async (command: 'play' | 'pause' | 'stop' | 'restart') => {
-    if (!deviceId) return;
-
-    try {
-      await commandsApi.send(deviceId, command, device?.currentUrl);
-      toast({
-        title: "Kommando skickat",
-        description: `${command} har skickats till enheten`,
-      });
-    } catch (error) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte skicka kommando",
-        variant: "destructive",
-      });
+    // Uppdatera lokalt status direkt
+    if (device) {
+      const newStatus = command === 'play' ? 'playing' : 
+                       command === 'pause' ? 'paused' : 
+                       command === 'stop' ? 'stopped' : device.status;
+      setDevice({ ...device, status: newStatus });
     }
+
+    toast({
+      title: "Kommando skickat",
+      description: `${command} - fungerar när Firebase är anslutet`,
+    });
+
+    // Om du vill använda Firebase senare:
+    // if (!deviceId) return;
+    // try {
+    //   await commandsApi.send(deviceId, command, device?.currentUrl);
+    //   toast({ title: "Kommando skickat", description: `${command} har skickats till enheten` });
+    // } catch (error) {
+    //   toast({ title: "Fel", description: "Kunde inte skicka kommando", variant: "destructive" });
+    // }
   };
 
   const handleVolumeChange = async (newVolume: number) => {
-    if (!deviceId) return;
     setVolume(newVolume);
-
-    try {
-      await commandsApi.send(deviceId, 'volume', undefined, newVolume);
-    } catch (error) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte ändra volym",
-        variant: "destructive",
-      });
+    
+    // Uppdatera lokalt
+    if (device) {
+      setDevice({ ...device, volume: newVolume });
     }
+
+    // Om du vill använda Firebase senare:
+    // if (!deviceId) return;
+    // try {
+    //   await commandsApi.send(deviceId, 'volume', undefined, newVolume);
+    // } catch (error) {
+    //   toast({ title: "Fel", description: "Kunde inte ändra volym", variant: "destructive" });
+    // }
   };
 
   const handleSignOut = async () => {
