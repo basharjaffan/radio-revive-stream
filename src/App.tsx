@@ -20,7 +20,7 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<UserLogin />} />
             <Route path="/device" element={<DeviceControl />} />
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<DeviceControl />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

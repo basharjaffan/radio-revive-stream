@@ -18,13 +18,11 @@ const DeviceControl = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || !deviceId) {
-      navigate('/login');
-      return;
-    }
+    // För nu, använd mock data om ingen deviceId finns
+    const testDeviceId = deviceId || 'test-device-1';
 
     // Lyssna på enhetens status i realtid
-    const unsubscribe = devicesApi.subscribeToDevice(deviceId, (updatedDevice) => {
+    const unsubscribe = devicesApi.subscribeToDevice(testDeviceId, (updatedDevice) => {
       setDevice(updatedDevice);
       if (updatedDevice?.volume !== undefined) {
         setVolume(updatedDevice.volume);
@@ -33,7 +31,7 @@ const DeviceControl = () => {
     });
 
     return () => unsubscribe();
-  }, [user, deviceId, navigate]);
+  }, [deviceId]);
 
   const handleCommand = async (command: 'play' | 'pause' | 'stop' | 'restart') => {
     if (!deviceId) return;
